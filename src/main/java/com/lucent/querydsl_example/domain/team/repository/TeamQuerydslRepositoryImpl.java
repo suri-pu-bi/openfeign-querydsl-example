@@ -6,6 +6,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class TeamQuerydslRepositoryImpl {
+public class TeamQuerydslRepositoryImpl implements TeamQuerydslRepository {
 	private final JPAQueryFactory queryFactory;
 }
