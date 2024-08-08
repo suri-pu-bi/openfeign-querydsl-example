@@ -3,6 +3,7 @@ package com.lucent.querydsl_example.domain.member.repository;
 import java.util.List;
 
 import com.lucent.querydsl_example.domain.member.entity.Member;
+import com.querydsl.core.Tuple;
 
 public interface MemberQuerydslRepository {
 	// 동일 여부
@@ -25,4 +26,7 @@ public interface MemberQuerydslRepository {
 	List<Member> findAgeGtMember(int age);
 	List<Member> findAgeLoeMember(int age);
 	List<Member> findAgeLtMember(int age);
+
+	// 집합
+	Tuple aggregationMember();
 }
