@@ -5,6 +5,7 @@ import static com.lucent.querydsl_example.domain.member.entity.QMember.*;
 import java.util.List;
 
 import com.lucent.querydsl_example.domain.member.entity.Member;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -104,5 +105,18 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 		return queryFactory.selectFrom(member)
 			.where(member.age.lt(age))
 			.fetch();
+	}
+
+	@Override
+	public Tuple aggregationMember() {
+		return queryFactory.select(
+			member.count(),
+			member.age.sum(),
+			member.age.avg(),
+			member.age.max(),
+			member.age.min()
+		)
+			.from(member)
+			.fetchOne();
 	}
 }
