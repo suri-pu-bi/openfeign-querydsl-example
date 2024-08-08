@@ -1,5 +1,6 @@
 package com.lucent.querydsl_example.domain.member.repository;
 
+import static com.lucent.querydsl_example.domain.member.entity.QMember.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import com.lucent.querydsl_example.domain.config.QuerydslTestConfig;
 import com.lucent.querydsl_example.domain.member.entity.Member;
-
+import com.querydsl.core.Tuple;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -215,6 +216,22 @@ class MemberRepositoryTest {
 		// then
 		assertEquals(2, result.size());
 	}
+
+	@Test
+	@DisplayName("회원 데이터의 집함 함수를 수행할 때, 카운트, 합계, 평균, 최대값, 최소값이 예상된 값과 일치한다")
+	public void aggregation() {
+		// when
+		Tuple result = memberRepository.aggregationMember();
+
+		// then
+		assertEquals(result.get(member.count()), 5);
+		assertEquals(result.get(member.age.sum()), 128);
+		assertEquals(result.get(member.age.avg()), 25.6);
+		assertEquals(result.get(member.age.max()), 30);
+		assertEquals(result.get(member.age.min()), 23);
+
+	}
+
 
 
 
