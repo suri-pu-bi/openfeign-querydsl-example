@@ -2,6 +2,9 @@ package com.lucent.querydsl_example.domain.member.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.lucent.querydsl_example.domain.member.entity.Member;
 import com.querydsl.core.Tuple;
 
@@ -29,4 +32,12 @@ public interface MemberQuerydslRepository {
 
 	// 집합
 	Tuple aggregationMember();
+
+	// 정렬
+	List<Member> sortMember();
+
+	// 페이징
+	List<Member> pagingMember();
+	Page<Member> pagingMemberUsingPageImpl(Pageable pageable);
+	Page<Member> pagingMemberUsingPageUtil(Pageable pageable);
 }
