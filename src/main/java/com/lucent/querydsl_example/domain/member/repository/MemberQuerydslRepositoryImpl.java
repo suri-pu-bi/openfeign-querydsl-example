@@ -4,8 +4,14 @@ import static com.lucent.querydsl_example.domain.member.entity.QMember.*;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
+
 import com.lucent.querydsl_example.domain.member.entity.Member;
 import com.querydsl.core.Tuple;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -118,5 +124,67 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 		)
 			.from(member)
 			.fetchOne();
+	}
+
+	@Override
+	public List<Member> sortMember() {
+		return queryFactory
+			.selectFrom(member)
+			.orderBy(member.age.desc(), // 내림차순
+				member.name.asc().nullsLast()) // 나이가 같다면, 오름차순
+			.fetch();
+	}
+
+	@Override
+	public List<Member> pagingMember() {
+		return queryFactory
+			.selectFrom(member)
+			.orderBy(member.age.desc(),
+				member.name.asc())
+			.offset(1) // 시작 지점
+			.limit(2) // 개수 제한
+			.fetch();
+	}
+
+	@Override
+	public Page<Member> pagingMemberUsingPageImpl(Pageable pageable) {
+		List<Member> result = queryFactory
+			.selectFrom(member)
+			.orderBy(member.age.desc(),
+				member.name.asc())
+			.offset(pageable.getOffset()) // 시작 지점
+			.limit(pageable.getPageSize()) // 개수 제한
+			.fetch();
+
+		int totalCount = queryFactory
+			.select(member.count())
+			.from(member)
+			.orderBy(
+				member.age.desc(),
+				member.name.asc()
+			).fetch().size();
+
+		return new PageImpl<>(result, pageable, totalCount);
+	}
+
+	@Override
+	public Page<Member> pagingMemberUsingPageUtil(Pageable pageable) {
+		List<Member> result = queryFactory
+			.selectFrom(member)
+			.orderBy(member.age.desc(),
+				member.name.asc())
+			.offset(pageable.getOffset()) // 시작 지점
+			.limit(pageable.getPageSize()) // 개수 제한
+			.fetch();
+
+		JPAQuery<Long> countQuery = queryFactory
+			.select(member.count())
+			.from(member)
+			.orderBy(
+				member.age.desc(),
+				member.name.asc()
+			);
+
+		return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
 	}
 }
