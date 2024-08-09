@@ -1,5 +1,6 @@
 package com.lucent.querydsl_example.domain.team.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -26,7 +27,7 @@ public class Team {
 	private Long id;
 
 	@OneToMany(mappedBy = "team")
-	private List<Member> members;
+	private List<Member> members = new ArrayList<>();
 
 	@Column(columnDefinition = "VARCHAR(20)", nullable = false)
 	private String name;

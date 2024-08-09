@@ -12,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import com.lucent.querydsl_example.domain.config.QuerydslTestConfig;
 import com.lucent.querydsl_example.domain.member.entity.Member;
 import com.querydsl.core.Tuple;
@@ -229,7 +233,60 @@ class MemberRepositoryTest {
 		assertEquals(result.get(member.age.avg()), 25.6);
 		assertEquals(result.get(member.age.max()), 30);
 		assertEquals(result.get(member.age.min()), 23);
+	}
 
+	@Test
+	@DisplayName("회원의 나이를 내림차순으로 정렬하고, 나이가 같다면 이름으로 오름차순 정렬하며, 이름이 없는 회원은 맨 마지막에 올 때, 예상된 순서와 일치한다")
+	public void sortMember() {
+		// when
+		List<Member> members =  memberRepository.sortMember();
+
+		// then
+		assertEquals(members.get(0).getName(), "냥이");
+		assertEquals(members.get(1).getName(), "주희");
+		assertEquals(members.get(2).getName(), "수미");
+		assertEquals(members.get(3).getName(), "동건");
+		assertEquals(members.get(4).getName(), "몽미");
+	}
+
+	@Test
+	@DisplayName("멤버를 나이 내림차순, 이름 오름차순으로 정렬하고, 1번째부터 2개의 멤버를 페이징할 때, 예상된 순서와 일치한다")
+	public void pagingMember() {
+		// when
+		List<Member> members = memberRepository.pagingMember();
+
+		// then
+		assertEquals(2, members.size());
+		assertEquals(members.get(0).getName(), "주희");
+		assertEquals(members.get(1).getName(), "수미");
+	}
+
+	@Test
+	@DisplayName("회원 목록을 페이지 번호 1, 사이즈 2로 페이징할 때, 두 번째 페이지의 회원 목록이 예상과 일치하고, 마지막 페이지에서는 카운트 쿼리를 실행한다")
+	public void pagingMemberUsingPageImpl() {
+		// given
+		// 페이지 번호가 1이고, 사이즈가 2이므로 페이지 번호 0: 냥이, 주희 / 1: 수미, 동건 / 2 : 몽미
+		PageRequest pageRequest = PageRequest.of(2, 2);
+
+		// when
+		Page<Member> result = memberRepository.pagingMemberUsingPageImpl(pageRequest);
+
+		// then
+		assertEquals(result.getContent().get(0).getName(), "몽미");
+	}
+
+	@Test
+	@DisplayName("회원 목록을 페이지 번호 1, 사이즈 2로 페이징할 때, 두 번째 페이지의 회원 목록이 예상과 일치하고, 마지막 페이지에서는 카운트 쿼리를 실행하지 않는다")
+	public void pagingMemberUsingPageUtil() {
+		// given
+		// 페이지 번호가 1이고, 사이즈가 2이므로 페이지 번호 0: 냥이, 주희 / 1: 수미, 동건 / 2 : 몽미
+		PageRequest pageRequest = PageRequest.of(2, 2);
+
+		// when
+		Page<Member> result = memberRepository.pagingMemberUsingPageUtil(pageRequest);
+
+		// then
+		assertEquals(result.getContent().get(0).getName(), "몽미");
 	}
 
 
