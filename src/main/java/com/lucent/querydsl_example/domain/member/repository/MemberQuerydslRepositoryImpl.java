@@ -1,6 +1,8 @@
 package com.lucent.querydsl_example.domain.member.repository;
 
+import static com.lucent.querydsl_example.domain.manager.entity.QManager.*;
 import static com.lucent.querydsl_example.domain.member.entity.QMember.*;
+import static com.lucent.querydsl_example.domain.team.entity.QTeam.*;
 
 import java.util.List;
 
@@ -186,5 +188,65 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 			);
 
 		return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+	}
+
+	@Override
+	public List<Member> joinWhereTeamName(String teamName) {
+		return queryFactory
+			.selectFrom(member)
+			.join(member.team, team)
+			.where(team.name.eq(teamName))
+			.fetch();
+	}
+
+	@Override
+	public List<Member> innerJoinWhereTeamName(String teamName) {
+		return queryFactory
+			.selectFrom(member)
+			.innerJoin(member.team, team)
+			.where(team.name.eq(teamName))
+			.fetch();
+	}
+
+	@Override
+	public List<Tuple> leftJoinOnTeamName(String teamName) {
+		return queryFactory
+			.select(member, team)
+			.from(member)
+			.leftJoin(member.team, team)
+			.on(team.name.eq(teamName))
+			.fetch();
+	}
+
+	@Override
+	public List<Tuple> rightJoinOnTeamName(String teamName) {
+		return queryFactory
+			.select(member, team)
+			.from(member)
+			.rightJoin(member.team, team)
+			.on(team.name.eq(teamName))
+			.fetch();
+	}
+
+	@Override
+	public List<Member> thetaJoinWhereMemberSalaryMoreThanManagerSalary() {
+		return queryFactory
+			.select(member)
+			.from(member, manager)
+			.where(member.salary.loe(manager.salary))
+			.groupBy(member.id)
+			.fetch();
+	}
+
+	@Override
+	public List<Tuple> lefJoinHaveNotRelationShipOnMemberSalaryMoreThanManagerSalary() {
+		return queryFactory
+			.select(member, manager)
+			.from(member)
+			.leftJoin(manager)
+			.on(member.salary.loe(manager.salary))
+			.orderBy(manager.name.asc().nullsLast())
+			.fetch();
+
 	}
 }
