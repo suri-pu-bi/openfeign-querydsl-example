@@ -40,4 +40,13 @@ public interface MemberQuerydslRepository {
 	List<Member> pagingMember();
 	Page<Member> pagingMemberUsingPageImpl(Pageable pageable);
 	Page<Member> pagingMemberUsingPageUtil(Pageable pageable);
+
+	// 조인
+	List<Member> joinWhereTeamName(String teamName);
+	List<Member> innerJoinWhereTeamName(String teamName);
+	List<Tuple> leftJoinOnTeamName(String teamName);
+	List<Tuple> rightJoinOnTeamName(String teamName);
+	List<Member> thetaJoinWhereMemberSalaryMoreThanManagerSalary();
+	List<Tuple> lefJoinHaveNotRelationShipOnMemberSalaryMoreThanManagerSalary();
+
 }
