@@ -249,4 +249,13 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 			.fetch();
 
 	}
+
+	@Override
+	public List<Member> fetchJoin(String teamName) {
+		return queryFactory
+			.selectFrom(member)
+			.join(member.team, team).fetchJoin()
+			.where(team.name.eq(teamName))
+			.fetch();
+	}
 }
