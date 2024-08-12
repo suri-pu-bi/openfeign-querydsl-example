@@ -1,11 +1,14 @@
 package com.lucent.querydsl_example.domain.member.repository;
 
+import java.awt.*;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.lucent.querydsl_example.domain.member.dto.TeamMemberCount;
 import com.lucent.querydsl_example.domain.member.entity.Member;
+import com.lucent.querydsl_example.domain.team.entity.Team;
 import com.querydsl.core.Tuple;
 
 public interface MemberQuerydslRepository {
@@ -49,4 +52,10 @@ public interface MemberQuerydslRepository {
 	List<Member> thetaJoinWhereMemberSalaryMoreThanManagerSalary();
 	List<Tuple> lefJoinHaveNotRelationShipOnMemberSalaryMoreThanManagerSalary();
 	List<Member> fetchJoin(String teamName);
+
+	// 서브쿼리
+	List<TeamMemberCount> subQueryInSelect();
+	Member subQueryWhere(Long teamId);
+	List<Member> subQueryUsingIn();
+
 }
