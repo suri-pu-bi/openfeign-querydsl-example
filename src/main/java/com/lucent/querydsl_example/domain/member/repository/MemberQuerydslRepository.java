@@ -48,5 +48,5 @@ public interface MemberQuerydslRepository {
 	List<Tuple> rightJoinOnTeamName(String teamName);
 	List<Member> thetaJoinWhereMemberSalaryMoreThanManagerSalary();
 	List<Tuple> lefJoinHaveNotRelationShipOnMemberSalaryMoreThanManagerSalary();
-
+	List<Member> fetchJoin(String teamName);
 }
