@@ -19,6 +19,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -330,5 +331,22 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 				.otherwise(member.age))
 			.from(member)
 			.fetch();
+	}
+
+	@Override
+	public List<Tuple> addConstant() {
+		return queryFactory
+			.select(member.name, Expressions.constant("A"))
+			.from(member)
+			.fetch();
+	}
+
+	@Override
+	public List<String> addString() {
+		return queryFactory
+			.select(member.name.concat("_").concat(member.age.stringValue()).prepend("HI_"))
+			.from(member)
+			.fetch();
+
 	}
 }
