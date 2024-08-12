@@ -8,11 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceUnitUtil;
 
-import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,12 +19,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import com.lucent.querydsl_example.domain.config.QuerydslTestConfig;
 import com.lucent.querydsl_example.domain.manager.entity.Manager;
 import com.lucent.querydsl_example.domain.manager.repository.ManagerRepository;
 import com.lucent.querydsl_example.domain.member.entity.Member;
+import com.lucent.querydsl_example.domain.member.dto.TeamMemberCount;
+import com.lucent.querydsl_example.domain.team.dto.TeamResponse;
 import com.lucent.querydsl_example.domain.team.entity.Team;
 import com.lucent.querydsl_example.domain.team.repository.TeamRepository;
 import com.querydsl.core.Tuple;
@@ -442,6 +440,79 @@ class MemberRepositoryTest {
 		// then
 		assertTrue(entityManager.getEntityManagerFactory().getPersistenceUnitUtil().isLoaded(result.get(0).getTeam()));
 	}
+
+	@Test
+	@DisplayName("멤버 카운트를 팀별로 조회할 때, 반환된 리스트의 크기가 4이고, 첫 번째 팀의 이름이 A1, 그 팀의 멤버 수가 2이며, 두 번째 팀의 이름이 A2이다")
+	public void subQueryInSelect() {
+		// when
+		List<TeamMemberCount> result = memberRepository.subQueryInSelect();
+
+		// then
+		assertEquals(result.size(), 4);
+		assertEquals(result.get(0).getTeamName(), "A1");
+		assertEquals(result.get(0).getMemberCount(), 2);
+		assertEquals(result.get(1).getTeamName(), "A2");
+	}
+
+	@Test
+	@DisplayName("특정 팀 ID를 기반으로 최고 급여를 받는 멤버를 조회할 때, 해당 멤버의 이름이 수미이고, 그 멤버가 속한 팀의 이름이 A1이다")
+	public void subQueryWhere() {
+		// given
+		Long teamId = 1L;
+
+		// when
+		Member member = memberRepository.subQueryWhere(1L);
+
+		// then
+		assertEquals(member.getName(), "수미");
+		assertEquals(member.getTeam().getName(), "A1");
+	}
+
+	@Test
+	@DisplayName("평균 급여보다 높은 급여를 가진 멤버들을 조회할 때, 결과 크기가 2이고, 첫번쨰 멤버는 수미이며, 두번째 멤버는 주희이다")
+	public void subQueryWhereIn() {
+		// when
+		List<Member> members = memberRepository.subQueryUsingIn();
+
+		// then
+		assertEquals(members.size(), 2);
+		assertEquals(members.get(0).getName(), "수미");
+		assertEquals(members.get(1).getName(), "주희");
+	}
+
+	@Test
+	public void projectionTeam() {
+		// when
+		List<TeamResponse> result = teamRepository.projectionTeam();
+
+		// then
+		assertEquals(result.get(0).getTeamName(), "A1");
+		assertEquals(result.get(0).getBudget(), 70000000);
+
+	}
+
+	@Test
+	@DisplayName("멤버의 나이가 23이면 '23', 25이면 '25', 그 외에는 '기타'로 결과를 반환할 때, 첫 번째 결과가 25이다")
+	public void basicCase() {
+		// when
+		List<String> result = memberRepository.basicCase();
+
+		// then
+		assertEquals(Integer.parseInt(result.get(0)), 25);
+	}
+
+	@Test
+	@DisplayName("멤버의 나이가 20에서 25세 사이이면 나이에 1을 더한 값, 26에서 30세 사이이면 나이에 -1을 뺀 값, 그 외에는 나이 그대로를 반환할 때, 첫 번째 결과가 26이다")
+
+	public void complexCase() {
+		// when
+		List<Integer> result = memberRepository.complexCase();
+
+		// then
+		assertEquals(result.get(0), 26);
+	}
+
+
 
 
 
