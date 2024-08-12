@@ -18,6 +18,7 @@ import com.lucent.querydsl_example.domain.team.entity.Team;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -307,5 +308,27 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 					)
 				)
 			).fetch();
+	}
+
+	@Override
+	public List<String> basicCase() {
+		return queryFactory
+			.select(member.age
+				.when(23).then("23")
+				.when(25).then("25")
+				.otherwise("기타"))
+			.from(member)
+			.fetch();
+	}
+
+	@Override
+	public List<Integer> complexCase() {
+		return queryFactory
+			.select(new CaseBuilder()
+				.when(member.age.between(20, 25)).then(member.age.add(1))
+				.when(member.age.between(26, 30)).then(member.age.add(-1))
+				.otherwise(member.age))
+			.from(member)
+			.fetch();
 	}
 }
