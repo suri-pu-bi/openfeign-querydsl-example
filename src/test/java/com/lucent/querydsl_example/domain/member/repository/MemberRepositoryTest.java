@@ -7,6 +7,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnitUtil;
+
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +37,8 @@ import com.querydsl.core.Tuple;
 @Import(QuerydslTestConfig.class)
 class MemberRepositoryTest {
 
+	@PersistenceContext
+	private EntityManager entityManager;
 	@Autowired
 	private MemberRepository memberRepository;
 	@Autowired
@@ -136,6 +144,8 @@ class MemberRepositoryTest {
 		managerRepository.save(manager3);
 		managerRepository.save(manager4);
 
+		entityManager.flush();
+		entityManager.clear();
 
 	}
 
@@ -420,6 +430,17 @@ class MemberRepositoryTest {
 		assertNull(result.get(7).get(manager));
 		assertEquals(result.get(2).get(manager).getName(), "매니저1");
 		assertEquals(result.get(3).get(manager).getName(), "매니저4");
+	}
+
+	@Test
+	@DisplayName("fetchJoin을 이용하여 팀 이름이 'A1'인 회원을 조회할 때, 회원의 팀이 프록시가 아닌 실제로 로드된 상태인지 검증한다")
+	public void fetchJoin() {
+		// given
+		String teamName = "A1";
+		// when
+		List<Member> result = memberRepository.fetchJoin(teamName);
+		// then
+		assertTrue(entityManager.getEntityManagerFactory().getPersistenceUnitUtil().isLoaded(result.get(0).getTeam()));
 	}
 
 
