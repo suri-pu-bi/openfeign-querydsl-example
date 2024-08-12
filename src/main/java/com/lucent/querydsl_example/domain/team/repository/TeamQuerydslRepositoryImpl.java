@@ -4,6 +4,7 @@ import static com.lucent.querydsl_example.domain.team.entity.QTeam.*;
 
 import java.util.List;
 
+import com.lucent.querydsl_example.domain.team.dto.QTeamResponse;
 import com.lucent.querydsl_example.domain.team.dto.TeamResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -17,7 +18,7 @@ public class TeamQuerydslRepositoryImpl implements TeamQuerydslRepository {
 	@Override
 	public List<TeamResponse> projectionTeam() {
 		return queryFactory.select(
-				Projections.bean(TeamResponse.class,
+				new QTeamResponse(
 					team.name.as("teamName"), team.budget))
 			.from(team)
 			.fetch();
