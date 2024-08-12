@@ -3,6 +3,7 @@ package com.lucent.querydsl_example.domain.member.repository;
 import static com.lucent.querydsl_example.domain.manager.entity.QManager.*;
 import static com.lucent.querydsl_example.domain.member.entity.QMember.*;
 import static com.lucent.querydsl_example.domain.team.entity.QTeam.*;
+import static com.querydsl.core.types.ExpressionUtils.*;
 
 import java.util.List;
 
@@ -11,8 +12,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import com.lucent.querydsl_example.domain.member.dto.TeamMemberCount;
 import com.lucent.querydsl_example.domain.member.entity.Member;
+import com.lucent.querydsl_example.domain.team.entity.Team;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -257,5 +263,49 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 			.join(member.team, team).fetchJoin()
 			.where(team.name.eq(teamName))
 			.fetch();
+	}
+
+	@Override
+	public List<TeamMemberCount> subQueryInSelect() {
+		return queryFactory.select(
+			Projections.fields(TeamMemberCount.class,
+			team.name.as("teamName"),
+				ExpressionUtils.as(
+					JPAExpressions.select(count(member.id))
+						.from(member)
+						.where(member.team.eq(team)),
+					"memberCount")
+				))
+			.from(team)
+			.fetch();
+	}
+
+	@Override
+	public Member subQueryWhere(Long teamId) {
+		return queryFactory
+			.selectFrom(member)
+			.where(member.salary.eq(
+				JPAExpressions
+					.select(member.salary.max())
+					.from(member)
+					.where(member.team.id.eq(teamId))))
+			.fetchFirst();
+	}
+
+	@Override
+	public List<Member> subQueryUsingIn() {
+		return queryFactory
+			.selectFrom(member)
+			.where(member.salary.in(
+				JPAExpressions
+					.select(member.salary)
+					.from(member)
+					.where(member.salary.gt(
+						JPAExpressions
+							.select(member.salary.avg().intValue())
+							.from(member))
+					)
+				)
+			).fetch();
 	}
 }
