@@ -29,6 +29,7 @@ import com.lucent.querydsl_example.domain.team.dto.TeamResponse;
 import com.lucent.querydsl_example.domain.team.entity.Team;
 import com.lucent.querydsl_example.domain.team.repository.TeamRepository;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -503,13 +504,34 @@ class MemberRepositoryTest {
 
 	@Test
 	@DisplayName("멤버의 나이가 20에서 25세 사이이면 나이에 1을 더한 값, 26에서 30세 사이이면 나이에 -1을 뺀 값, 그 외에는 나이 그대로를 반환할 때, 첫 번째 결과가 26이다")
-
 	public void complexCase() {
 		// when
 		List<Integer> result = memberRepository.complexCase();
 
 		// then
 		assertEquals(result.get(0), 26);
+	}
+
+	@Test
+	@DisplayName("멤버 이름과 상수 값을 반환할 때, 첫 번째 멤버의 이름이 '수미'이고 상수 값은 'A'이다.")
+	public void addConstant() {
+		// when
+		List<Tuple> result = memberRepository.addConstant();
+
+		// then
+		assertEquals(result.get(0).get(member.name), "수미");
+		assertEquals(result.get(0).get(Expressions.constant("A")), "A");
+
+	}
+
+	@Test
+	@DisplayName("멤버 이름과 나이를 문자열로 결합하고 'HI_'를 접두사로 붙일 때, 첫 번째 멤버의 문자열이 'HI_수미_25'이다.")
+	public void addString() {
+		// when
+		List<String> result = memberRepository.addString();
+
+		// then
+		assertEquals(result.get(0), "HI_수미_25");
 	}
 
 
