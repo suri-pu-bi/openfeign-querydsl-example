@@ -61,4 +61,8 @@ public interface MemberQuerydslRepository {
 	// case 문
 	List<String> basicCase();
 	List<Integer> complexCase();
+
+	// 상수, 문자 더하기
+	List<Tuple> addConstant();
+	List<String> addString();
 }
