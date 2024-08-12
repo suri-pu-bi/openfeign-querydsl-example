@@ -58,4 +58,7 @@ public interface MemberQuerydslRepository {
 	Member subQueryWhere(Long teamId);
 	List<Member> subQueryUsingIn();
 
+	// case 문
+	List<String> basicCase();
+	List<Integer> complexCase();
 }
