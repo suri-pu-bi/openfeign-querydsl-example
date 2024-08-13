@@ -13,9 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
 
+import com.lucent.querydsl_example.domain.member.dto.MemberResponse;
 import com.lucent.querydsl_example.domain.member.dto.TeamMemberCount;
 import com.lucent.querydsl_example.domain.member.entity.Member;
-import com.lucent.querydsl_example.domain.team.entity.Team;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
@@ -386,6 +386,37 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 			.where(allEq(name, age))
 			.fetch();
 	}
+
+	@Override
+	public Long updateBulk() {
+		return queryFactory
+			.update(member)
+			.set(member.age, member.age.add(1))
+			.where(member.age.goe(24))
+			.execute();
+	}
+
+	@Override
+	public Long deleteBulk() {
+		return queryFactory
+			.delete(member)
+			.where(member.age.lt(25))
+			.execute();
+	}
+
+	@Override
+	public List<MemberResponse> notFetchJoinUsingLeftJoinWithOn() {
+		return queryFactory
+			.select(
+				Projections.fields(MemberResponse.class,
+					member.team.name.as("teamName"), member.name.as("memberName"), member.age.as("memberAge")))
+			.from(member)
+			.leftJoin(member.team, team)
+			.on(team.name.eq("A1"))
+			.fetch();
+	}
+
+
 
 	private BooleanExpression allEq(String name, Integer age) {
 		return nameEq(name).and(ageEq(age));
