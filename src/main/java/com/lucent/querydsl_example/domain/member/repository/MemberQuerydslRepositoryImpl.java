@@ -11,13 +11,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.StringUtils;
 
 import com.lucent.querydsl_example.domain.member.dto.TeamMemberCount;
 import com.lucent.querydsl_example.domain.member.entity.Member;
 import com.lucent.querydsl_example.domain.team.entity.Team;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -348,5 +351,51 @@ public class MemberQuerydslRepositoryImpl implements MemberQuerydslRepository {
 			.from(member)
 			.fetch();
 
+	}
+
+	@Override
+	public List<Integer> distinctSalary(Long teamId) {
+		return queryFactory
+			.select(member.salary).distinct()
+			.from(member)
+			.join(member.team, team)
+			.where(team.id.eq(teamId))
+			.fetch();
+	}
+
+	@Override
+	public List<Member> searchMemberUsingBuilder(String name, Integer age) {
+		BooleanBuilder builder = new BooleanBuilder();
+
+		if (StringUtils.hasText(name)) {
+			builder.and(member.name.eq(name));
+		}
+		if (age != null) {
+			builder.and(member.age.eq(age));
+		}
+		return queryFactory
+			.selectFrom(member)
+			.where(builder)
+			.fetch();
+	}
+
+	@Override
+	public List<Member> searchMemberUsingExpression(String name, Integer age) {
+		return queryFactory
+			.selectFrom(member)
+			.where(allEq(name, age))
+			.fetch();
+	}
+
+	private BooleanExpression allEq(String name, Integer age) {
+		return nameEq(name).and(ageEq(age));
+	}
+
+	private BooleanExpression nameEq(String name) {
+		return name != null ? member.name.eq(name) : null;
+	}
+
+	private BooleanExpression ageEq(Integer age) {
+		return age != null ? member.age.eq(age) : null;
 	}
 }
