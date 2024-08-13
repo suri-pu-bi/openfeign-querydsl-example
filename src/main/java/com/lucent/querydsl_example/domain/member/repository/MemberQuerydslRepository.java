@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.lucent.querydsl_example.domain.member.dto.MemberResponse;
 import com.lucent.querydsl_example.domain.member.dto.TeamMemberCount;
 import com.lucent.querydsl_example.domain.member.entity.Member;
 import com.lucent.querydsl_example.domain.team.entity.Team;
@@ -72,4 +73,12 @@ public interface MemberQuerydslRepository {
 	// 동적 쿼리
 	List<Member> searchMemberUsingBuilder(String name, Integer age);
 	List<Member> searchMemberUsingExpression(String name, Integer age);
+
+	// 벌크 연산
+	Long updateBulk();
+	Long deleteBulk();
+
+	// fetchJoin with On
+	List<MemberResponse> notFetchJoinUsingLeftJoinWithOn();
+
 }
