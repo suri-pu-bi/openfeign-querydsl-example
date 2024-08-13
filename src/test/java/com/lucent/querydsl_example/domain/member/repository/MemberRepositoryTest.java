@@ -6,6 +6,7 @@ import static com.lucent.querydsl_example.domain.team.entity.QTeam.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import com.lucent.querydsl_example.domain.config.QuerydslTestConfig;
 import com.lucent.querydsl_example.domain.manager.entity.Manager;
 import com.lucent.querydsl_example.domain.manager.repository.ManagerRepository;
+import com.lucent.querydsl_example.domain.member.dto.MemberResponse;
 import com.lucent.querydsl_example.domain.member.entity.Member;
 import com.lucent.querydsl_example.domain.member.dto.TeamMemberCount;
 import com.lucent.querydsl_example.domain.team.dto.TeamResponse;
@@ -30,6 +32,7 @@ import com.lucent.querydsl_example.domain.team.entity.Team;
 import com.lucent.querydsl_example.domain.team.repository.TeamRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -561,6 +564,70 @@ class MemberRepositoryTest {
 
 		// then
 		assertEquals(members.size(), 1);
+	}
+
+	@Test
+	@DisplayName("Bulk 연산으로 24세 이상 멤버들의 나이를 1씩 증가시킬 때, 3명의 멤버가 업데이트되고, 특정 멤버들의 나이가 각각 26세와 28세로 증가한다.")
+	public void updateBulk() {
+		// given
+		Member member1 = memberRepository.findById(1L).get();
+		Member member4 = memberRepository.findById(4L).get();
+
+		// when
+		Long count = memberRepository.updateBulk(); // count : update의 영향을 받은 row 수
+
+		entityManager.flush();
+		entityManager.clear();
+
+		Member updatedMember1 = memberRepository.findById(1L).get();
+		Member updatedMember4 = memberRepository.findById(4L).get();
+
+		// then
+		assertEquals(3, count);
+		assertEquals(updatedMember1.getAge(), 26);
+		assertEquals(updatedMember4.getAge(), 28);
+
+	}
+
+	@Test
+	@DisplayName("Bulk 연산으로 25세 미만의 멤버들을 삭제할 때, 2명의 멤버가 삭제되고, 삭제된 멤버를 조회할 때 NoSuchElementException이 발생한다.")
+	public void deleteBulk() {
+		// given
+		Member member2 = memberRepository.findById(2L).get();
+		Member member3 = memberRepository.findById(3L).get();
+
+		// when
+		Long count = memberRepository.deleteBulk();
+
+		entityManager.flush();
+		entityManager.clear();
+
+
+		// then
+		assertEquals(2, count);
+		assertThrows(
+			NoSuchElementException.class, () -> {
+				memberRepository.findById(2L).get();
+			});
+
+	}
+
+	@Test
+	@DisplayName("패치조인 대상에 on절을 사용할 때, SenmanticException이 발생한다.")
+	public void fetchJoinWithOn() {
+		// when
+		List<MemberResponse> members = memberRepository.notFetchJoinUsingLeftJoinWithOn();
+	}
+
+	@Test
+	@DisplayName("멤버의 나이가 23세 이상인 팀을 조회할 때, 23세 이상의 멤버들이 같은 팀에 여러 명 있을 경우, 결과에 동일한 팀이 중복되어 나타난다.")
+	public void fetchJoinWithWhere() {
+		// when
+		List<Team> teams = teamRepository.fetchJoinWithWhere();
+
+		// then
+		assertEquals(teams.get(0).getName(), "A1");
+		assertEquals(teams.get(1).getName(), "A1");
 	}
 
 
