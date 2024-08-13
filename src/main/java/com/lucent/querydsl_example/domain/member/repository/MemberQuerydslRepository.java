@@ -65,4 +65,11 @@ public interface MemberQuerydslRepository {
 	// 상수, 문자 더하기
 	List<Tuple> addConstant();
 	List<String> addString();
+
+	// distinct
+	List<Integer> distinctSalary(Long teamId);
+
+	// 동적 쿼리
+	List<Member> searchMemberUsingBuilder(String name, Integer age);
+	List<Member> searchMemberUsingExpression(String name, Integer age);
 }
