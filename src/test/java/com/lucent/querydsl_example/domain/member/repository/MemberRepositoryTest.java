@@ -513,7 +513,7 @@ class MemberRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("멤버 이름과 상수 값을 반환할 때, 첫 번째 멤버의 이름이 '수미'이고 상수 값은 'A'이다.")
+	@DisplayName("멤버 이름과 상수 값을 반환할 때, 첫 번째 멤버의 이름이 '수미'이고 상수 값은 'A'이다")
 	public void addConstant() {
 		// when
 		List<Tuple> result = memberRepository.addConstant();
@@ -525,7 +525,7 @@ class MemberRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("멤버 이름과 나이를 문자열로 결합하고 'HI_'를 접두사로 붙일 때, 첫 번째 멤버의 문자열이 'HI_수미_25'이다.")
+	@DisplayName("멤버 이름과 나이를 문자열로 결합하고 'HI_'를 접두사로 붙일 때, 첫 번째 멤버의 문자열이 'HI_수미_25'이다")
 	public void addString() {
 		// when
 		List<String> result = memberRepository.addString();
@@ -534,6 +534,34 @@ class MemberRepositoryTest {
 		assertEquals(result.get(0), "HI_수미_25");
 	}
 
+	@Test
+	@DisplayName("특정 팀 ID를 기반으로 멤버의 급여를 조회할 때, distinct된 결과로 팀에 속한 첫 번째 멤버 급여가 90,000,000이고 두 번째 멤버 급여가 70,000,000이다")
+	public void distinctSalary() {
+		//given
+		Long teamId = 1L;
+
+		// when
+		List<Integer> result = memberRepository.distinctSalary(teamId);
+
+		// then
+		assertEquals(result.get(0), 90000000);
+		assertEquals(result.get(1), 70000000);
+	}
+
+	@Test
+	@DisplayName("이름과 나이로 멤버를 검색할 때, 이름이 '수미'이고, 25살인 멤버가 한 명 존재한다.")
+	public void searchMember() {
+		// given
+		String name = "수미";
+		Integer age = 25;
+
+		// when
+		// List<Member> members = memberRepository.searchMemberUsingBuilder(name, age);
+		List<Member> members = memberRepository.searchMemberUsingExpression(name, age);
+
+		// then
+		assertEquals(members.size(), 1);
+	}
 
 
 
